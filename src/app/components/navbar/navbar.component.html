@@ -1,0 +1,17 @@
+<mat-toolbar class="d-flex justify-content-between">
+  <div class="d-flex align-items-center">
+    <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Detalles del usuario">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <span mat-menu-item *ngIf="userInfo">{{userInfo.name?.first}} {{userInfo.name?.last}}</span>
+      <span mat-menu-item *ngIf="userInfo">{{userInfo.email}}</span>
+      <span mat-menu-item *ngIf="userInfo">{{userInfo.phone}}</span>
+    </mat-menu>
+    <span>MercadoFood</span>
+  </div>
+  <span class="example-spacer"></span>
+  <button (click)="logOut()" mat-icon-button class="example-icon" aria-label="Cerrar sesion">
+    <mat-icon>exit_to_app</mat-icon>
+  </button>
+</mat-toolbar>

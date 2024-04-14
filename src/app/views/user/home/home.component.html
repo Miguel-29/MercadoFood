@@ -1,0 +1,189 @@
+<app-navbar></app-navbar>
+
+<div class="container-fluid">
+  <mat-tab-group>
+    <mat-tab label="Tienda"> 
+      <div class="container-fluid py-5">
+        <mat-form-field class="w-100" appearance="outline">
+          <mat-label>Filtrar productos</mat-label>
+          <input matInput (keyup)="applyFilter($event)" placeholder="Escribe un caracter" #input>
+        </mat-form-field>
+        <div class="mat-elevation-z8 overflow-auto">
+          <table mat-table [dataSource]="dataSource" matSort>
+      
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre </th>
+              <td mat-cell *matCellDef="let row"> {{row.name}} </td>
+            </ng-container>
+      
+            <ng-container matColumnDef="description">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Descripción </th>
+              <td mat-cell *matCellDef="let row"> {{row.description}} </td>
+            </ng-container>
+      
+            <ng-container matColumnDef="price">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Precio </th>
+              <td mat-cell *matCellDef="let row"> {{row.price}} </td>
+            </ng-container>
+      
+            <ng-container matColumnDef="quantityAvailable">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Cantidad disponible </th>
+              <td mat-cell *matCellDef="let row"> {{row.quantityAvailable}} </td>
+            </ng-container>
+      
+            <ng-container matColumnDef="star" stickyEnd>
+              <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+              <td mat-cell *matCellDef="let element">
+                <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                  <button mat-menu-item (click)="addCar(element, $event)" *ngIf="!getQuantity(element)">
+                    <mat-icon>add_shopping_cart</mat-icon>
+                    <span>Agregar al carrito</span>
+                  </button>
+                  <div class="content-car" *ngIf="getQuantity(element)">
+                    <button mat-icon-button (click)="removeCar(element, $event)" aria-label="remover item al carrito">
+                      <mat-icon>remove_circle_outline</mat-icon>
+                    </button>
+                    <mat-form-field class="">
+                      <mat-label>Value</mat-label>
+                      <input matInput type="number" [value]="getQuantity(element)">
+                      <mat-hint>cantidad de productos</mat-hint>
+                    </mat-form-field>
+                    <button mat-icon-button (click)="addCar(element, $event)" aria-label="agregar item al carrito">
+                      <mat-icon>add_circle_outline</mat-icon>
+                    </button>
+                  </div>
+                </mat-menu>
+              </td>
+            </ng-container>
+      
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell" colspan="4">No se encontraron productos, puedes agregar uno nuevo</td>
+            </tr>
+          </table>
+          <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of dataSource"></mat-paginator>
+        </div>
+      </div>
+      
+      <button (click)="showCar(template)" [disabled]="!listProductsCar.length" mat-fab class="btn-car" matTooltip="Primary"
+        color="primary" aria-label="carrito de compras">
+        <mat-icon>shopping_cart</mat-icon>
+      </button>
+    </mat-tab>
+    <mat-tab label="Pedidos" [disabled]="!listOrders.length">
+      <mat-accordion>
+        <mat-expansion-panel (opened)="applyTableOrder(order.elements)" hideToggle *ngFor="let order of listOrders">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              Pedido
+            </mat-panel-title>
+            <mat-panel-description>
+              Este pedido fue realizado {{calcDate(order.order.dateOrder)}} y su estado es {{order.order.status}}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+          <div class="mat-elevation-z8 overflow-auto">
+            <table mat-table [dataSource]="dataSourceOrder" matSort>
+        
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre </th>
+                <td mat-cell *matCellDef="let row"> {{row.element.name}} </td>
+                <td mat-footer-cell *matFooterCellDef mat-sort-footer></td>
+              </ng-container>
+      
+              <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Descripción </th>
+                <td mat-cell *matCellDef="let row"> {{row.element.description}} </td>
+                <td mat-footer-cell *matFooterCellDef mat-sort-footer></td>
+              </ng-container>
+      
+              <ng-container matColumnDef="price">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Precio </th>
+                <td mat-cell *matCellDef="let row"> {{row.element.price}} </td>
+                <td mat-footer-cell *matFooterCellDef mat-sort-footer></td>
+              </ng-container>
+      
+              <ng-container matColumnDef="quantity">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Cantidad </th>
+                <td mat-cell *matCellDef="let row"> {{row.quantity}} </td>
+                <td mat-footer-cell *matFooterCellDef mat-sort-footer> Total </td>
+              </ng-container>
+      
+              <ng-container matColumnDef="total" stickyEnd>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Subtotal</th>
+                <td mat-cell *matCellDef="let row"> {{calcTotal(row)}} </td>
+                <td mat-footer-cell *matFooterCellDef mat-sort-footer> {{getTotalCost(order.elements)}} </td>
+              </ng-container>
+        
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsCar"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsCar;"></tr>
+        
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell" colspan="4">No se encontraron productos, puedes agregar uno nuevo</td>
+              </tr>
+            </table>
+            <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of dataSourceOrder"></mat-paginator>
+          </div>
+        </mat-expansion-panel>      
+      </mat-accordion>
+    </mat-tab>
+  </mat-tab-group>  
+</div>
+
+<!-- modal para el formulario de agregar productos -->
+<ng-template #template>
+  <mat-dialog-content>
+    <div class="mat-elevation-z8 overflow-auto">
+      <p class="title mb-3 text-center">Resumen del carrito</p>
+      <table mat-table [dataSource]="dataSourceCar" matSort>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre </th>
+          <td mat-cell *matCellDef="let row"> {{row.element.name}} </td>
+          <td mat-footer-cell *matFooterCellDef mat-sort-footer></td>
+        </ng-container>
+
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Descripción </th>
+          <td mat-cell *matCellDef="let row"> {{row.element.description}} </td>
+          <td mat-footer-cell *matFooterCellDef mat-sort-footer></td>
+        </ng-container>
+
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Precio </th>
+          <td mat-cell *matCellDef="let row"> {{row.element.price}} </td>
+          <td mat-footer-cell *matFooterCellDef mat-sort-footer></td>
+        </ng-container>
+
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Cantidad </th>
+          <td mat-cell *matCellDef="let row"> {{row.quantity}} </td>
+          <td mat-footer-cell *matFooterCellDef mat-sort-footer> Total </td>
+        </ng-container>
+
+        <ng-container matColumnDef="total" stickyEnd>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Subtotal</th>
+          <td mat-cell *matCellDef="let row"> {{calcTotal(row)}} </td>
+          <td mat-footer-cell *matFooterCellDef mat-sort-footer> {{getTotalCost(listProductsCar)}} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsCar"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsCar;"></tr>
+        <tr mat-footer-row *matFooterRowDef="displayedColumnsCar"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="4">No se encontraron productos, puedes agregar uno nuevo</td>
+        </tr>
+      </table>
+      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of dataSource"></mat-paginator>
+    </div>
+    <mat-dialog-actions align="center">
+      <button mat-button (click)="closeModal()">Cancelar</button>
+      <button mat-button (click)="setCar()" color="primary" cdkFocusInitial>Completar pedido</button>
+    </mat-dialog-actions>
+  </mat-dialog-content>
+</ng-template>

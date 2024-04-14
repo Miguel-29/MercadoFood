@@ -1,0 +1,12 @@
+.modal-header{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    .modal-header__icon{
+        .icon{
+            width: fit-content;
+            height: fit-content;
+            font-size: 40px;
+        }
+    }
+}
